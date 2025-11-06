@@ -16,6 +16,19 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 
+# Add url_for to template environment for dynamic URLs
+def url_for(name: str, **path_params):
+    """Helper function for generating URLs in templates"""
+    if name == "static":
+        path = path_params.get("path", "")
+        return f"/static/{path}"
+    # For other routes, return empty string or handle as needed
+    return ""
+
+
+templates.env.globals["url_for"] = url_for
+
+
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     """Serve the main homepage"""

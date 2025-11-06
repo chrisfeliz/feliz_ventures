@@ -38,8 +38,8 @@
                     heart of Charlotte, North Carolina. With a commitment to excellence and a passion for transforming
                     visions into reality, we take pride in shaping the future of the communities we serve.</p>
                 <div class="about-image-container">
-                    <img src="/static/images/logo.jpg" alt="New Construction - Single Family Residences"
-                        class="about-image">
+                    <img src="{{ url_for('static', path='images/logo.jpg') }}"
+                        alt="New Construction - Single Family Residences" class="about-image">
                 </div>
             </div>
         </section>
@@ -53,9 +53,9 @@
             <div class="container">
                 <div class="footer-contact">
                     <div class="footer-links">
+                        <a href="/sell-your-land">Sell Your Land</a>
                         <a href="/contact">Contact Us</a>
                         <a href="/privacy-policy">Privacy Policy</a>
-                        <a href="/sell-your-land">Sell Your Land</a>
                     </div>
                 </div>
             </div>
