@@ -10,7 +10,23 @@ import json
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import logging
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+# Create console handler
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+
+# Create formatter
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+
+# Add handler to logger
+logger.addHandler(ch)
+
+logger.info("Logger initialized")
 app = FastAPI(title="Feliz Ventures LLC")
 
 # Mount static files
@@ -72,8 +88,10 @@ def send_email(contents: dict[str, Any]):
     sender_email = os.getenv("EMAIL_SENDER", "")
     receiver_email = os.getenv("EMAIL_RECEIVER", "")
     creds_check = False if not all([password, sender_email, receiver_email]) else True
+
     if not creds_check:
-        print("Missing credentials!")
+        logger.info("Missing credentials!")
+
     msg = MIMEMultipart("alternative")
     msg["Subject"] = "New Lead Received!"
     msg["From"] = sender_email
