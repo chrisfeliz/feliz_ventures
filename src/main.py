@@ -66,6 +66,22 @@ async def privacy_policy(request: Request):
     """Serve the privacy policy page"""
     return templates.TemplateResponse("privacy.html", {"request": request})
 
+def send_email(contents: dict[str, Any]):
+    """Send email with lead data."""
+    password = os.getenv("EMAIL_PASSWORD")
+    sender_email = os.getenv("EMAIL_SENDER")
+    receiver_email = os.getenv("EMAIL_RECEIVER")
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = "New Lead Received!"
+    msg["From"] = sender_email
+    msg["To"] = receiver_email
+    text = f"Hi there,\nNew lead received: {json.dumps(contents, indent=4)}!"
+    msg.attach(MIMEText(text, "plain"))
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, msg.as_string())
 
 @app.post("/sell-your-land", response_class=RedirectResponse)
 async def collect_form_data(
@@ -98,23 +114,6 @@ async def collect_form_data(
         print(f"Error saving form data: {e}")
         # Redirect back with error message
         return RedirectResponse(url="/sell-your-land?error=true", status_code=303)
-
-def send_email(contents: dict[str, Any]):
-    """Send email with lead data."""
-    password = os.getenv("EMAIL_PASSWORD")
-    sender_email = os.getenv("EMAIL_SENDER")
-    receiver_email = os.getenv("EMAIL_RECEIVER")
-
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = "New Lead Received!"
-    msg["From"] = sender_email
-    msg["To"] = receiver_email
-    text = f"Hi there,\nNew lead received: {json.dumps(contents, indent=4)}!"
-    msg.attach(MIMEText(text, "plain"))
-
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, msg.as_string())
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
