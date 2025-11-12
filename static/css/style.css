@@ -148,9 +148,9 @@ header {
 
 /* Hero Section */
 .hero {
-    background-image: url('/static/images/base_image_v3.png');
+    background-image: url('/static/images/architecture-9458934_1920.png');
     background-size: cover;
-    background-position: center;
+    background-position: center -350px;
     background-repeat: no-repeat;
     color: var(--white);
     padding: 110px 0;

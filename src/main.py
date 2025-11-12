@@ -1,3 +1,4 @@
+from typing import Any
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -6,6 +7,9 @@ from datetime import datetime
 import os
 import uvicorn
 import json
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 app = FastAPI(title="Feliz Ventures LLC")
 
@@ -85,17 +89,8 @@ async def collect_form_data(
         "submitted_at": datetime.now().isoformat(),
     }
 
-    # Create data directory if it doesn't exist
-    data_dir = "data"
-    os.makedirs(data_dir, exist_ok=True)
-
-    # Save form submission to JSON file
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"{data_dir}/submission_{timestamp}.json"
-
     try:
-        with open(filename, "w") as f:
-            json.dump(form_data, f, indent=2)
+        send_email(form_data)
         # Redirect back to the form with a success message
         return RedirectResponse(url="/sell-your-land?success=true", status_code=303)
 
@@ -104,6 +99,22 @@ async def collect_form_data(
         # Redirect back with error message
         return RedirectResponse(url="/sell-your-land?error=true", status_code=303)
 
+def send_email(contents: dict[str, Any]):
+    """Send email with lead data."""
+    password = os.getenv("EMAIL_PASSWORD")
+    sender_email = os.getenv("EMAIL_SENDER")
+    receiver_email = os.getenv("EMAIL_RECEIVER")
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = "New Lead Received!"
+    msg["From"] = sender_email
+    msg["To"] = receiver_email
+    text = f"Hi there,\nNew lead received: {json.dumps(contents, indent=4)}!"
+    msg.attach(MIMEText(text, "plain"))
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, msg.as_string())
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
