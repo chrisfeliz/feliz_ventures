@@ -68,10 +68,12 @@ async def privacy_policy(request: Request):
 
 def send_email(contents: dict[str, Any]):
     """Send email with lead data."""
-    password = os.getenv("EMAIL_PASSWORD")
-    sender_email = os.getenv("EMAIL_SENDER")
-    receiver_email = os.getenv("EMAIL_RECEIVER")
-
+    password = os.getenv("EMAIL_PASSWORD", "")
+    sender_email = os.getenv("EMAIL_SENDER", "")
+    receiver_email = os.getenv("EMAIL_RECEIVER", "")
+    creds_check = False if not all([password, sender_email, receiver_email]) else True
+    if not creds_check:
+        print("Missing credentials!")
     msg = MIMEMultipart("alternative")
     msg["Subject"] = "New Lead Received!"
     msg["From"] = sender_email
