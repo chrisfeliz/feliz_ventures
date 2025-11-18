@@ -150,10 +150,10 @@ header {
 .hero {
     background-image: url('/static/images/architecture-9458934_1920.png');
     background-size: cover;
-    background-position: center -350px;
+    background-position: center -600px;
     background-repeat: no-repeat;
     color: var(--white);
-    padding: 110px 0;
+    padding: 70px 0;
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -609,7 +609,7 @@ footer {
 /* Responsive Design */
 @media (min-width: 1024px) {
     .hero {
-        min-height: 425px;
+        min-height: 250px;
     }
 }
 
