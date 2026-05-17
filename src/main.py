@@ -128,11 +128,17 @@ def send_email(contents: dict[str, Any]):
     text = f"Hi there,\nNew lead received: {json.dumps(contents, indent=4)}!"
     msg.attach(MIMEText(text, "plain"))
 
-    with smtplib.SMTP("smtp.gmail.com", 587) as server:
-        server.ehlo()
-        server.starttls()
-        server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, msg.as_string())
+    smtp_port = int(os.getenv("SMTP_PORT", "465"))
+    if smtp_port == 587:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(sender_email, password)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+    else:
+        with smtplib.SMTP_SSL("smtp.gmail.com", smtp_port) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
 
 @app.post("/sell-your-land", response_class=RedirectResponse)
 async def collect_form_data(
