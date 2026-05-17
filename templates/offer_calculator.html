@@ -149,6 +149,63 @@
             line-height: 1.6;
             margin-top: 0.5rem;
         }
+
+        .lead-gate {
+            display: none;
+            margin-top: 2.5rem;
+            padding: 2.5rem;
+            background: var(--beige-light);
+            border-radius: 16px;
+            border: 2px solid rgba(52, 57, 82, 0.1);
+            text-align: center;
+        }
+
+        .lead-gate.visible {
+            display: block;
+        }
+
+        .lead-gate h3 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .lead-gate p {
+            font-size: 0.95rem;
+            color: var(--gray-dark);
+            margin-bottom: 1.75rem;
+        }
+
+        .lead-gate .form-group {
+            text-align: left;
+        }
+
+        .lead-gate-btn {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+            color: var(--white);
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(52, 57, 82, 0.2);
+            letter-spacing: -0.01em;
+            margin-top: 0.5rem;
+        }
+
+        .lead-gate-btn:hover {
+            background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(52, 57, 82, 0.3);
+        }
+
+        .lead-gate-btn:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
 
@@ -319,6 +376,26 @@
                         </div>
                     </form>
 
+                    <div class="lead-gate" id="lead-gate">
+                        <h3>Where should we send your estimate?</h3>
+                        <p>Enter your info below to see your offer range — no commitment, no spam.</p>
+                        <form id="lead-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="lead-name" class="required">Full Name</label>
+                                    <input type="text" id="lead-name" name="name" required placeholder="Jane Smith">
+                                </div>
+                                <div class="form-group">
+                                    <label for="lead-email" class="required">Email Address</label>
+                                    <input type="email" id="lead-email" name="email" required placeholder="jane@example.com">
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: center;">
+                                <button type="submit" class="lead-gate-btn">Show My Estimate</button>
+                            </div>
+                        </form>
+                    </div>
+
                     <div class="result-box" id="result-box">
                         <div class="result-label">Our estimated offer range</div>
                         <div class="result-range" id="result-range"></div>
@@ -378,6 +455,10 @@
             return '$' + Math.round(n).toLocaleString('en-US');
         }
 
+        let pendingLow = 0;
+        let pendingHigh = 0;
+        let pendingInputs = {};
+
         document.getElementById('calculator-form').addEventListener('submit', function (e) {
             e.preventDefault();
 
@@ -397,12 +478,36 @@
             if (utilities === 'yes') marketValue *= 1.15;
             if (liens === 'yes') marketValue *= 0.80;
 
-            const low = marketValue * 0.15;
-            const high = marketValue * 0.20;
+            pendingLow = marketValue * 0.15;
+            pendingHigh = marketValue * 0.20;
+            pendingInputs = { acreage, state, zoning, road_access: roadAccess, utilities, liens };
+
+            const leadGate = document.getElementById('lead-gate');
+            leadGate.classList.add('visible');
+            leadGate.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+
+        document.getElementById('lead-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('lead-name').value;
+            const email = document.getElementById('lead-email').value;
+
+            fetch('/offer-calculator/lead', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name, email,
+                    estimate_low: Math.round(pendingLow),
+                    estimate_high: Math.round(pendingHigh),
+                    ...pendingInputs,
+                }),
+            }).catch(() => {});
 
             document.getElementById('result-range').textContent =
-                formatCurrency(low) + ' – ' + formatCurrency(high);
+                formatCurrency(pendingLow) + ' – ' + formatCurrency(pendingHigh);
 
+            document.getElementById('lead-gate').classList.remove('visible');
             const resultBox = document.getElementById('result-box');
             resultBox.classList.add('visible');
             resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

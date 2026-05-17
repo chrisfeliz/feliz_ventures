@@ -88,6 +88,30 @@ async def offer_calculator(request: Request):
     """Serve the offer calculator page"""
     return templates.TemplateResponse("offer_calculator.html", {"request": request})
 
+
+@app.post("/offer-calculator/lead")
+async def calculator_lead(request: Request):
+    """Capture lead from offer calculator and send email notification"""
+    data = await request.json()
+    logger.info(f"Calculator lead received: {data.get('email')}")
+    try:
+        send_email({
+            "source": "offer_calculator",
+            "name": data.get("name"),
+            "email": data.get("email"),
+            "state": data.get("state"),
+            "acreage": data.get("acreage"),
+            "zoning": data.get("zoning"),
+            "road_access": data.get("road_access"),
+            "utilities": data.get("utilities"),
+            "liens": data.get("liens"),
+            "estimate_low": f"${data.get('estimate_low', 0):,}",
+            "estimate_high": f"${data.get('estimate_high', 0):,}",
+        })
+    except Exception as e:
+        logger.error(f"Failed to send calculator lead email: {e}")
+    return {"status": "ok"}
+
 def send_email(contents: dict[str, Any]):
     """Send email with lead data."""
     password = os.getenv("EMAIL_PASSWORD", "")
