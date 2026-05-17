@@ -7,9 +7,7 @@ from datetime import datetime
 import os
 import uvicorn
 import json
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import resend
 import logging
 
 logger = logging.getLogger(__name__)
@@ -114,31 +112,20 @@ async def calculator_lead(request: Request):
 
 def send_email(contents: dict[str, Any]):
     """Send email with lead data."""
-    password = os.getenv("EMAIL_PASSWORD", "")
-    sender_email = os.getenv("EMAIL_SENDER", "")
+    api_key = os.getenv("resend_api_key", "")
     receiver_email = os.getenv("EMAIL_RECEIVER", "")
-    if not all([password, sender_email, receiver_email]):
-        logger.warning("Missing email credentials — skipping send")
+
+    if not all([api_key, receiver_email]):
+        logger.warning("Missing Resend API key or receiver email — skipping send")
         return
 
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = "New Lead Received!"
-    msg["From"] = sender_email
-    msg["To"] = receiver_email
-    text = f"Hi there,\nNew lead received: {json.dumps(contents, indent=4)}!"
-    msg.attach(MIMEText(text, "plain"))
-
-    smtp_port = int(os.getenv("SMTP_PORT", "465"))
-    if smtp_port == 587:
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.ehlo()
-            server.starttls()
-            server.login(sender_email, password)
-            server.sendmail(sender_email, receiver_email, msg.as_string())
-    else:
-        with smtplib.SMTP_SSL("smtp.gmail.com", smtp_port) as server:
-            server.login(sender_email, password)
-            server.sendmail(sender_email, receiver_email, msg.as_string())
+    resend.api_key = api_key
+    resend.Emails.send({
+        "from": "Feliz Ventures <onboarding@resend.dev>",
+        "to": receiver_email,
+        "subject": "New Lead Received!",
+        "text": f"Hi there,\nNew lead received:\n\n{json.dumps(contents, indent=4)}",
+    })
 
 @app.post("/sell-your-land", response_class=RedirectResponse)
 async def collect_form_data(
