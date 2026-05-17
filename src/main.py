@@ -82,6 +82,12 @@ async def privacy_policy(request: Request):
     """Serve the privacy policy page"""
     return templates.TemplateResponse("privacy.html", {"request": request})
 
+
+@app.get("/offer-calculator", response_class=HTMLResponse)
+async def offer_calculator(request: Request):
+    """Serve the offer calculator page"""
+    return templates.TemplateResponse("offer_calculator.html", {"request": request})
+
 def send_email(contents: dict[str, Any]):
     """Send email with lead data."""
     password = os.getenv("EMAIL_PASSWORD", "")
