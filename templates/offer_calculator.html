@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offer Calculator - Feliz Ventures LLC</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .calculator-card {
+            max-width: 800px;
+            margin: 3rem auto 0;
+            background: var(--white);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 15px rgba(52, 57, 82, 0.1), 0 4px 6px rgba(52, 57, 82, 0.05);
+            border: 1px solid rgba(52, 57, 82, 0.08);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .radio-option {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+
+        .radio-option label {
+            display: block;
+            padding: 0.75rem 1.25rem;
+            border: 2px solid var(--gray-light);
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 500;
+            color: var(--gray-dark);
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+        }
+
+        .radio-option input[type="radio"]:checked + label {
+            border-color: var(--navy);
+            background-color: var(--navy);
+            color: var(--white);
+        }
+
+        .radio-option label:hover {
+            border-color: var(--navy-light);
+            background-color: var(--beige-light);
+            color: var(--navy);
+        }
+
+        .radio-option input[type="radio"]:checked + label:hover {
+            background-color: var(--navy);
+            color: var(--white);
+        }
+
+        .result-box {
+            display: none;
+            margin-top: 2.5rem;
+            padding: 2.5rem;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+            border-radius: 16px;
+            text-align: center;
+            color: var(--white);
+        }
+
+        .result-box.visible {
+            display: block;
+        }
+
+        .result-label {
+            font-size: 0.95rem;
+            font-weight: 500;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .result-range {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.75rem;
+        }
+
+        .result-disclaimer {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            line-height: 1.6;
+            margin-bottom: 1.75rem;
+        }
+
+        .result-cta {
+            display: inline-block;
+            background: var(--white);
+            color: var(--navy);
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .result-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .calc-btn {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+            color: var(--white);
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(52, 57, 82, 0.2);
+            letter-spacing: -0.01em;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .calc-btn:hover {
+            background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(52, 57, 82, 0.3);
+        }
+
+        .calc-btn:active {
+            transform: translateY(0);
+        }
+
+        .disclaimer-top {
+            font-size: 0.9rem;
+            color: var(--gray);
+            line-height: 1.6;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-brand">
+                    <a href="/">Feliz Ventures LLC</a>
+                    <span class="tagline">Real Estate Development Based in North Carolina</span>
+                </div>
+                <button class="menu-toggle" aria-label="Toggle menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-menu">
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/sell-your-land">Sell Your Land</a></li>
+                    <li><a href="/offer-calculator">Offer Calculator</a></li>
+                    <li><a href="/contact">Contact Us</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="page-content">
+            <div class="container">
+                <h1>Offer Calculator</h1>
+                <p>Answer a few quick questions about your land and we'll estimate the range we'd likely offer. No
+                    commitment required — this is just a starting point.</p>
+                <p class="disclaimer-top">Estimates are based on general market data and may vary significantly based on
+                    specific location, condition, and current market conditions.</p>
+
+                <div class="calculator-card">
+                    <form id="calculator-form">
+
+                        <div class="form-group">
+                            <label for="acreage" class="required">How many acres?</label>
+                            <input type="number" id="acreage" name="acreage" min="0.1" step="0.1"
+                                placeholder="e.g. 5.0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="state" class="required">State</label>
+                            <select id="state" name="state" required>
+                                <option value="">Select State</option>
+                                <option value="NC">North Carolina</option>
+                                <option value="SC">South Carolina</option>
+                                <option value="GA">Georgia</option>
+                                <option value="FL">Florida</option>
+                                <option value="TX">Texas</option>
+                                <option value="VA">Virginia</option>
+                                <option value="TN">Tennessee</option>
+                                <option value="AL">Alabama</option>
+                                <option value="MS">Mississippi</option>
+                                <option value="AR">Arkansas</option>
+                                <option value="LA">Louisiana</option>
+                                <option value="OK">Oklahoma</option>
+                                <option value="KY">Kentucky</option>
+                                <option value="WV">West Virginia</option>
+                                <option value="MD">Maryland</option>
+                                <option value="DE">Delaware</option>
+                                <option value="OH">Ohio</option>
+                                <option value="IN">Indiana</option>
+                                <option value="IL">Illinois</option>
+                                <option value="MO">Missouri</option>
+                                <option value="KS">Kansas</option>
+                                <option value="NE">Nebraska</option>
+                                <option value="IA">Iowa</option>
+                                <option value="MN">Minnesota</option>
+                                <option value="WI">Wisconsin</option>
+                                <option value="MI">Michigan</option>
+                                <option value="PA">Pennsylvania</option>
+                                <option value="NY">New York</option>
+                                <option value="NJ">New Jersey</option>
+                                <option value="CT">Connecticut</option>
+                                <option value="MA">Massachusetts</option>
+                                <option value="RI">Rhode Island</option>
+                                <option value="NH">New Hampshire</option>
+                                <option value="VT">Vermont</option>
+                                <option value="ME">Maine</option>
+                                <option value="AK">Alaska</option>
+                                <option value="AZ">Arizona</option>
+                                <option value="CA">California</option>
+                                <option value="CO">Colorado</option>
+                                <option value="HI">Hawaii</option>
+                                <option value="ID">Idaho</option>
+                                <option value="MT">Montana</option>
+                                <option value="NV">Nevada</option>
+                                <option value="NM">New Mexico</option>
+                                <option value="ND">North Dakota</option>
+                                <option value="OR">Oregon</option>
+                                <option value="SD">South Dakota</option>
+                                <option value="UT">Utah</option>
+                                <option value="WA">Washington</option>
+                                <option value="WY">Wyoming</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Zoning type</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="zone-residential" name="zoning" value="residential">
+                                    <label for="zone-residential">Residential</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="zone-agricultural" name="zoning" value="agricultural" checked>
+                                    <label for="zone-agricultural">Agricultural</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="zone-commercial" name="zoning" value="commercial">
+                                    <label for="zone-commercial">Commercial</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="zone-raw" name="zoning" value="raw">
+                                    <label for="zone-raw">Raw / Unzoned</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Road access?</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="road-yes" name="road_access" value="yes" checked>
+                                    <label for="road-yes">Yes</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="road-no" name="road_access" value="no">
+                                    <label for="road-no">No</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Utilities available?</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="util-yes" name="utilities" value="yes" checked>
+                                    <label for="util-yes">Yes</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="util-no" name="utilities" value="no">
+                                    <label for="util-no">No</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Any liens or back taxes?</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="lien-no" name="liens" value="no" checked>
+                                    <label for="lien-no">No</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="lien-yes" name="liens" value="yes">
+                                    <label for="lien-yes">Yes</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0; display: flex; justify-content: center;">
+                            <button type="submit" class="calc-btn" style="width: auto;">Calculate My Estimate</button>
+                        </div>
+                    </form>
+
+                    <div class="result-box" id="result-box">
+                        <div class="result-label">Our estimated offer range</div>
+                        <div class="result-range" id="result-range"></div>
+                        <div class="result-disclaimer">
+                            This is a rough estimate based on general market data for your area. Our actual offer may
+                            differ once we review the specific parcel. There's no obligation — submit your info and we'll
+                            follow up within 24 hours.
+                        </div>
+                        <a href="/sell-your-land" class="result-cta">Get a Real Offer</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-top">
+            <div class="container"></div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="footer-contact">
+                    <div class="footer-links">
+                        <a href="/sell-your-land">Sell Your Land</a>
+                        <a href="/offer-calculator">Offer Calculator</a>
+                        <a href="/contact">Contact Us</a>
+                        <a href="/privacy-policy">Privacy Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        const PRICE_PER_ACRE = {
+            NC: 133000, SC: 114000, GA: 106400, FL: 190000, TX: 95000,
+            VA: 152000, TN: 121600, AL: 98800, MS: 91200, AR: 83600,
+            LA: 102600, OK: 68400, KY: 114000, WV: 95000, MD: 304000,
+            DE: 342000, OH: 171000, IN: 152000, IL: 209000, MO: 114000,
+            KS: 76000, NE: 83600, IA: 190000, MN: 152000, WI: 159600,
+            MI: 144400, PA: 190000, NY: 228000, NJ: 456000, CT: 380000,
+            MA: 418000, RI: 380000, NH: 266000, VT: 228000, ME: 171000,
+            AK: 30400, AZ: 57000, CA: 570000, CO: 114000, HI: 760000,
+            ID: 76000, MT: 57000, NV: 45600, NM: 38000, ND: 95000,
+            OR: 114000, SD: 76000, UT: 76000, WA: 190000, WY: 45600,
+        };
+
+        const ZONING_MULT = {
+            residential: 1.5,
+            agricultural: 1.0,
+            commercial: 2.0,
+            raw: 0.7,
+        };
+
+        function formatCurrency(n) {
+            return '$' + Math.round(n).toLocaleString('en-US');
+        }
+
+        document.getElementById('calculator-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const acreage = parseFloat(document.getElementById('acreage').value);
+            const state = document.getElementById('state').value;
+            const zoning = document.querySelector('input[name="zoning"]:checked').value;
+            const roadAccess = document.querySelector('input[name="road_access"]:checked').value;
+            const utilities = document.querySelector('input[name="utilities"]:checked').value;
+            const liens = document.querySelector('input[name="liens"]:checked').value;
+
+            if (!acreage || !state) return;
+
+            const basePerAcre = PRICE_PER_ACRE[state] || 2500;
+            let marketValue = acreage * basePerAcre * ZONING_MULT[zoning];
+
+            if (roadAccess === 'yes') marketValue *= 1.20;
+            if (utilities === 'yes') marketValue *= 1.15;
+            if (liens === 'yes') marketValue *= 0.80;
+
+            const low = marketValue * 0.15;
+            const high = marketValue * 0.20;
+
+            document.getElementById('result-range').textContent =
+                formatCurrency(low) + ' – ' + formatCurrency(high);
+
+            const resultBox = document.getElementById('result-box');
+            resultBox.classList.add('visible');
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+    </script>
+</body>
+
+</html>
