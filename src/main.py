@@ -128,7 +128,9 @@ def send_email(contents: dict[str, Any]):
     text = f"Hi there,\nNew lead received: {json.dumps(contents, indent=4)}!"
     msg.attach(MIMEText(text, "plain"))
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.ehlo()
+        server.starttls()
         server.login(sender_email, password)
         server.sendmail(sender_email, receiver_email, msg.as_string())
 
