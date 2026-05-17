@@ -112,7 +112,7 @@ async def calculator_lead(request: Request):
 
 def send_email(contents: dict[str, Any]):
     """Send email with lead data."""
-    api_key = os.getenv("resend_api_key", "")
+    api_key = os.getenv("RESEND_API_KEY", "")
     receiver_email = os.getenv("EMAIL_RECEIVER", "")
 
     if not all([api_key, receiver_email]):
