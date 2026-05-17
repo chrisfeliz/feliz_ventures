@@ -117,10 +117,9 @@ def send_email(contents: dict[str, Any]):
     password = os.getenv("EMAIL_PASSWORD", "")
     sender_email = os.getenv("EMAIL_SENDER", "")
     receiver_email = os.getenv("EMAIL_RECEIVER", "")
-    creds_check = False if not all([password, sender_email, receiver_email]) else True
-
-    if not creds_check:
-        logger.info("Missing credentials!")
+    if not all([password, sender_email, receiver_email]):
+        logger.warning("Missing email credentials — skipping send")
+        return
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = "New Lead Received!"
